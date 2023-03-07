@@ -22,6 +22,7 @@ connector_status = {
     'bybit': 'bronze',
     'coinbase_pro': 'bronze',
     'crypto_com': 'bronze',
+    'defund': 'gold',
     'dydx_perpetual': 'silver',
     'gate_io': 'silver',
     'gate_io_perpetual': 'silver',
