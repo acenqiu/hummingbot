@@ -32,7 +32,8 @@ if TYPE_CHECKING:
 s_logger = None
 
 class DefundExchange(ExchangePyBase):
-    DEFAULT_DOMAIN = ""
+    
+    web_utils = web_utils
 
     def __init__(self,
                  client_config_map: "ClientConfigAdapter",
@@ -159,7 +160,26 @@ class DefundExchange(ExchangePyBase):
         return 0
 
     async def _update_balances(self):
-        ...
+        local_asset_names = set(self._account_balances.keys())
+        remote_asset_names = set()
+
+        fund_info = await self._api_request(
+            path_url=CONSTANTS.FUND_INFO_PATH_URL,
+            is_auth_required=True)
+
+        balances = fund_info["tokenBalances"]
+        for balance_entry in balances:
+            asset_name = balance_entry["symbol"]
+            free_balance = Decimal(balance_entry["balanceWithUnit"])
+            total_balance = free_balance
+            self._account_available_balances[asset_name] = free_balance
+            self._account_balances[asset_name] = total_balance
+            remote_asset_names.add(asset_name)
+
+        asset_names_to_remove = local_asset_names.difference(remote_asset_names)
+        for asset_name in asset_names_to_remove:
+            del self._account_available_balances[asset_name]
+            del self._account_balances[asset_name]
 
     async def _update_trading_rules(self):
         ...
